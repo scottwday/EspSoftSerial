@@ -1,6 +1,8 @@
 # EspSoftSerial
 Software serial receiver for ESP8266
 
+Only supports 8N1 (or 7E1 or 7O1 if you're willing to check parity yourself.)
+
 Uses a pin change interrupt and the CPU tick timer as a uart receiver.
 
 Supports up to 4 receivers
