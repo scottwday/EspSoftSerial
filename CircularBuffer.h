@@ -21,6 +21,12 @@ class CircularBuffer
 
   public:
   
+	void reset()
+	{
+		_nextIn = 0;
+		_out = 0;
+	}
+
     bool write(T value)
     {
       _buffer[_nextIn] = value;

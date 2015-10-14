@@ -9,14 +9,10 @@ Uses a pin change interrupt and the tick timer as a uart receiver
 #define ESPSOFTSERIAL_H
 
 #define MAX_ESPSOFTSERIAL_INSTANCES 4
-#define SOFTSERIAL_BUFFER_LEN 128
+#define SOFTSERIAL_BUFFER_LEN 256
 
 #define SOFTSERIAL_ERROR_LONGLOW 1
 #define SOFTSERIAL_ERROR_STOPBIT 2
-
-#ifndef ESP8266_CLOCK
-#define ESP8266_CLOCK 80000000
-#endif
 
 #include <Arduino.h>
 #include "CircularBuffer.h"
@@ -34,7 +30,7 @@ class EspSoftSerialRx
     byte _bitCounter = 0;
     unsigned short _bitBuffer = 0;
     byte _inInterrupt = 0;
-
+	byte _instanceId = 0;
     CircularBuffer<byte, SOFTSERIAL_BUFFER_LEN> _buffer;
     
     static byte _numInstances;
@@ -51,6 +47,10 @@ class EspSoftSerialRx
 	// Read the next byte from the buffer
     bool read(byte& c);
 	
+	void setEnabled(bool enabled);
+
+	void reset();
+
   private:
     
 	static void onRxPinChange0();

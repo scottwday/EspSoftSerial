@@ -14,6 +14,34 @@ byte EspSoftSerialRx::_numInstances = 0;
 //Static pointers to instances, allows interrupts to be forwarded
 EspSoftSerialRx* EspSoftSerialRx::_instances[MAX_ESPSOFTSERIAL_INSTANCES];
 
+void EspSoftSerialRx::reset()
+{
+	_lastChangeTicks = 0;
+	_errorState = 0;
+	_bitCounter = 0;
+	_bitBuffer = 0;
+
+	_buffer.reset();
+}
+
+void EspSoftSerialRx::setEnabled( bool enabled)
+{
+	if (enabled)
+	{
+		switch (_instanceId)
+		{
+		case 0: attachInterrupt(_rxPin, onRxPinChange0, CHANGE); break;
+		case 1: attachInterrupt(_rxPin, onRxPinChange1, CHANGE); break;
+		case 2: attachInterrupt(_rxPin, onRxPinChange2, CHANGE); break;
+		case 3: attachInterrupt(_rxPin, onRxPinChange3, CHANGE); break;
+		}
+	}
+	else
+	{
+		detachInterrupt(_rxPin);
+	}
+}
+
 // Supply the baud rate and the pin you're interested in
 void EspSoftSerialRx::begin(const unsigned long baud, const byte rxPin)
 {
@@ -21,12 +49,14 @@ void EspSoftSerialRx::begin(const unsigned long baud, const byte rxPin)
   
   _halfBitRate = (ESP8266_CLOCK/2) / baud;
   
-  pinMode(rxPin, INPUT_PULLUP);
+//  pinMode(rxPin, INPUT_PULLUP);
+  pinMode(rxPin, INPUT);
 
   //You can't register an interrupt on a class member, so these shims pass on the call
   if (_numInstances < MAX_ESPSOFTSERIAL_INSTANCES)
   {
 	_instances[_numInstances] = this;
+	_instanceId = _numInstances;
 	switch(_numInstances)
 	{
 	  case 0: attachInterrupt(rxPin, onRxPinChange0, CHANGE); break;
@@ -115,6 +145,7 @@ inline void EspSoftSerialRx::addBits(byte numBits, byte value)
 	{
 	  char b = (char)((_bitBuffer>>1)&0xFF);
 	  _buffer.write(b);
+	  //Serial.print(b);
 	}
 	else
 	{
